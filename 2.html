@@ -1,0 +1,54 @@
+<pre><code>
+input {
+  file {
+    path => "/home/oeduman/Desktop/test3/dataset.csv"
+    start_position => "beginning"
+    sincedb_path => "/dev/null"
+  }
+}
+
+filter {
+  csv {
+    separator => ","
+    quote_char => '"'
+    columns => [
+      "a","b","c"
+    ]
+  }
+
+  if [a] == "a" {
+    drop { }
+  }
+
+  ruby {
+    code => "
+      numeric_fields = [
+	'a','b'
+      ]
+      numeric_fields.each do |field|
+        val = event.get(field).to_s.strip
+        if val =~ /^(-?\d+)/
+          event.set(field, $1.to_i)
+        else
+          event.set(field, nil)
+        end
+      end
+    "
+  }
+
+  mutate {
+    convert => {
+      "a" => "integer"
+    }
+    strip => ["c"]
+  }
+}
+
+output {
+  elasticsearch {
+    hosts => ["http://192.168.1.10:9200"]
+    index => "test_data"
+  }
+  stdout { codec => rubydebug }
+}
+</code></pre>
