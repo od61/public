@@ -1,0 +1,17 @@
+<pre><code>
+ruby {
+    code => "
+      numeric_fields = [
+        'a', 'b', 'c'
+      ]
+      numeric_fields.each do |field|
+        val = event.get(field).to_s.strip
+        if val =~ /^(-?\d+)/
+          event.set(field, $1.to_i)
+        else
+          event.set(field, nil)
+        end
+      end
+    "
+  }
+</code></pre>
