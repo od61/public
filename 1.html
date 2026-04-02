@@ -1,0 +1,37 @@
+input {
+  file {
+    path => "/home/oeduman/Desktop/test/screentime-app.csv"
+    start_position => "beginning"
+    sincedb_path => "/dev/null"
+  }
+}
+
+filter {
+  csv {
+    separator => ","
+    columns => ["Date","Usage","Notifications","Times opened","App"]
+    skip_header => true
+  }
+  mutate {
+    convert => {
+      Usage => "integer"
+      Notifications => "integer"
+      "Times opened" => "integer"
+      App => "string"
+    }
+  }
+  date {
+    match => ["Date", "MM/dd/YYYY"]
+    #match => ["Date","YYYY-MM-dd"]
+    # match => ["date", "YYYY-MM-dd HH:mm:ss"]
+    target => "@timestamp"
+  }
+}
+
+output {
+  elasticsearch {
+    hosts => ["http://192.168.1.10:9200"]
+    index => "3rd_test_data"
+  }
+  stdout {}
+}
